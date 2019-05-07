@@ -106,9 +106,18 @@ if (empty($_SESSION['email'])){
                                             <h3 class="title"> Laporan Keuangan </h3>
                                             <?php
                                             include_once("config.php");
-                                            $kredit = mysqli_query($conn, "SELECT SUM(kredit) AS jumlah FROM tb_kas");
+                                            if(isset($_GET['cari'])){
+                                            $cari1 = $_GET['cari1'];
+                                            $cari2 = $_GET['cari2'];
+                                            $kredit = mysqli_query($conn, "SELECT SUM(kredit) AS jumlah FROM tb_kas WHERE tanggal BETWEEN '$cari1' AND '$cari2' ");
+                                            $debit = mysqli_query($conn, "SELECT SUM(debit) AS jumlah FROM tb_kas WHERE tanggal BETWEEN '$cari1' AND '$cari2' ");  
+
+                                            }else{
+                                                $kredit = mysqli_query($conn, "SELECT SUM(kredit) AS jumlah FROM tb_kas"); 
+                                                $debit = mysqli_query($conn, "SELECT SUM(debit) AS jumlah FROM tb_kas");      
+                                            }
+                                            
                                             $datakredit = mysqli_fetch_array($kredit);
-                                            $debit = mysqli_query($conn, "SELECT SUM(debit) AS jumlah FROM tb_kas");
                                             $datadebit = mysqli_fetch_array($debit);
                                             $a = $datadebit['jumlah'];
                                             $b = $datakredit['jumlah'];
