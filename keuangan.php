@@ -109,19 +109,75 @@ if (empty($_SESSION['email'])){
                                             if(isset($_GET['cari'])){
                                             $cari1 = $_GET['cari1'];
                                             $cari2 = $_GET['cari2'];
+                                            $tanggalAwal = date('m',strtotime($cari1));
+                                            $tahunAwal = date('Y',strtotime($cari1));
+                                            $ceka = $tanggalAwal - 1;
+                                            $perAwal = $tahunAwal."-".$ceka."-31";
+                                            $kreditSaldo = mysqli_query($conn, "SELECT SUM(kredit) AS jum FROM tb_kas WHERE tanggal BETWEEN '1970-01-01' AND '$perAwal' ");
+                                            $debitSaldo = mysqli_query($conn, "SELECT SUM(debit) AS jum FROM tb_kas WHERE tanggal BETWEEN '1970-01-01' AND '$perAwal' ");
                                             $kredit = mysqli_query($conn, "SELECT SUM(kredit) AS jumlah FROM tb_kas WHERE tanggal BETWEEN '$cari1' AND '$cari2' ");
                                             $debit = mysqli_query($conn, "SELECT SUM(debit) AS jumlah FROM tb_kas WHERE tanggal BETWEEN '$cari1' AND '$cari2' ");  
 
                                             }else{
+                                                $kreditSaldo = mysqli_query($conn, "SELECT SUM(kredit) AS jum FROM tb_kas WHERE tanggal = '0000-0-0'");
+                                                $debitSaldo = mysqli_query($conn, "SELECT SUM(debit) AS jum FROM tb_kas WHERE tanggal = '0000-0-0'");
                                                 $kredit = mysqli_query($conn, "SELECT SUM(kredit) AS jumlah FROM tb_kas"); 
                                                 $debit = mysqli_query($conn, "SELECT SUM(debit) AS jumlah FROM tb_kas");      
                                             }
                                             
+                                            $debitAwalan = mysqli_fetch_array($debitSaldo);
+                                            $kreditAwalan = mysqli_fetch_array($kreditSaldo);
                                             $datakredit = mysqli_fetch_array($kredit);
                                             $datadebit = mysqli_fetch_array($debit);
                                             $a = $datadebit['jumlah'];
                                             $b = $datakredit['jumlah'];
                                             $c = $a - $b;
+                                            $x = $debitAwalan['jum'];
+                                            $y = $kreditAwalan['jum'];
+                                            $z = $x - $y;
+                                            $tot = $z + $a - $b;
+
+                                            if(isset($_GET['cari'])){
+                                            ?>
+
+                                            <div class="col-3 col-sm-3 stat-col pull-right">
+                                                <div class="stat-icon ">
+                                                    <i class="fa fa-money "></i>
+                                                </div>
+                                                <div class="stat">
+                                                    <div class="value"> <?php echo $tot ?> </div>
+                                                    <div class="name"> Saldo Ahir </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-3 col-sm-3 stat-col pull-right">
+                                                <div class="stat-icon ">
+                                                    <i class="fa fa-money "></i>
+                                                </div>
+                                                <div class="stat">
+                                                    <div class="value"> <?php echo $datakredit['jumlah'] ?> </div>
+                                                    <div class="name"> Kredit </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-3 col-sm-3 stat-col pull-right">
+                                                <div class="stat-icon ">
+                                                    <i class="fa fa-money "></i>
+                                                </div>
+                                                <div class="stat">
+                                                    <div class="value"> <?php echo$datadebit['jumlah'] ?> </div>
+                                                    <div class="name"> Debit </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-3 col-sm-3 stat-col pull-right">
+                                                <div class="stat-icon ">
+                                                    <i class="fa fa-money "></i>
+                                                </div>
+                                                <div class="stat">
+                                                    <div class="value"> <?php echo $z ?> </div>
+                                                    <div class="name"> Saldo Awal </div>
+                                                </div>
+                                            </div>
+                                            <?php
+                                        }else{
                                             ?>
                                             <div class="col-4 col-sm-4 stat-col pull-right">
                                                 <div class="stat-icon ">
@@ -150,6 +206,8 @@ if (empty($_SESSION['email'])){
                                                     <div class="name"> Debit </div>
                                                 </div>
                                             </div>
+                                            <?php
+                                        } ?>
                                         </div>
                                         <div><a href="tambahkas.php"> <button class='btn btn-primary btn-sm fa fa-primary'> tambah data </button></a>
                                         </div>
