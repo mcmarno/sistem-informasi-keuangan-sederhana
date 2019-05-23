@@ -61,19 +61,33 @@ class FPDF_AutoWrapTable extends FPDF {
 			$cari2 = $_GET['cari2'];
 			$a = empty($_GET['cari1']);
 			$b = empty($_GET['cari2']);
+			$tanggalAwal = date('m',strtotime($cari1));
+			$tahunAwal = date('Y',strtotime($cari1));
+			$ceka = $tanggalAwal - 1;
+			$perAwal = $tahunAwal."-".$ceka."-31";
 			if ($a AND $b) {
+				$kreditSaldo = mysqli_query($conn, "SELECT SUM(kredit) AS jum FROM tb_kas WHERE tanggal = '0000-0-0'");
+				$debitSaldo = mysqli_query($conn, "SELECT SUM(debit) AS jum FROM tb_kas WHERE tanggal = '0000-0-0'");
 				$debit = mysqli_query($conn, "SELECT SUM(debit) AS jumlah FROM tb_kas");
 				$kredit = mysqli_query($conn, "SELECT SUM(kredit) AS jumlah FROM tb_kas");
 			}else{
+				$kreditSaldo = mysqli_query($conn, "SELECT SUM(kredit) AS jum FROM tb_kas WHERE tanggal BETWEEN '1970-01-01' AND '$perAwal' ");
+				$debitSaldo = mysqli_query($conn, "SELECT SUM(debit) AS jum FROM tb_kas WHERE tanggal BETWEEN '1970-01-01' AND '$perAwal' ");
 				$debit = mysqli_query($conn, "SELECT SUM(debit) AS jumlah FROM tb_kas where tanggal BETWEEN '$cari1' AND '$cari2'");
 				$kredit = mysqli_query($conn, "SELECT SUM(kredit) AS jumlah FROM tb_kas where tanggal BETWEEN '$cari1' AND '$cari2'");
 					
 			}
+			$debitAwalan = mysqli_fetch_array($debitSaldo);
+			$kreditAwalan = mysqli_fetch_array($kreditSaldo);
 			$datadebit = mysqli_fetch_array($debit);
 			$datakredit = mysqli_fetch_array($kredit);
 			$jumlahdebit = $datadebit['jumlah'];
 			$jumlahkredit = $datakredit['jumlah'];
 			$jumlahsaldo = $jumlahdebit - $jumlahkredit;
+			$x = $debitAwalan['jum'];
+			$y = $kreditAwalan['jum'];
+			$z = $x - $y;
+			$tot = $z + $jumlahdebit - $jumlahkredit;
 		}
 
 		
@@ -151,13 +165,16 @@ class FPDF_AutoWrapTable extends FPDF {
 
 		$this->Ln(15);
 		$this->SetFont("", "", 12);
+		$this->Cell(0, 12, 'Jumlah saldo awal adalah : '.$z, 0, 1,'L');
+		$this->Ln(10);
+		$this->SetFont("", "", 12);
 		$this->Cell(0, 12, 'Jumlah debit pada tanggal : ' .$c. ' sampai tanggal : '.$d. ' adalah : '.$jumlahdebit, 0, 1,'L');
 		$this->Ln(10);
 		$this->SetFont("", "", 12);
 		$this->Cell(0, 12, 'Jumlah kredit pada tanggal : ' .$c. ' sampai tanggal : '.$d. ' adalah : '.$jumlahkredit, 0, 1,'L');
 		$this->Ln(10);
 		$this->SetFont("", "", 12);
-		$this->Cell(0, 12, 'Jumlah saldo pada tanggal : ' .$c. ' sampai tanggal : '.$d. ' adalah : '.$jumlahsaldo, 0, 1,'L');
+		$this->Cell(0, 12, 'Jumlah saldo akhir pada tanggal : ' .$c. ' sampai tanggal : '.$d. ' adalah : '.$tot, 0, 1,'L');
 		$this->Ln(15);
 		$this->SetFont("", "", 12);
 		$this->Cell(0, 12, 'Demikian untuk dapat dipergunakan sebagaimana mestinya. ', 0, 1,'L');
